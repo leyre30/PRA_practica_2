@@ -2,52 +2,131 @@
 #define DYV_H
 
 #include <vector>
-#include <iostream>
-#include <algorithm>
+#include <stdexcept>
+#include <cstdlib>
+#include <ctime>
 
-// Búsqueda binaria (ascendente). Devuelve índice o -1 si no se encuentra.
-template<typename T>
-int BusquedaBinaria(const std::vector<T>& v, const T& x, int ini, int fin) {
-    if (ini > fin) return -1;
+// Búsqueda Binaria en vector ordenado ascendentemente
+template <typename T>
+int BusquedaBinaria(T x, std::vector<T>& v, int ini, int fin) {
+    if (ini > fin) {
+        return -1; // No se encuentra en el array
+    }
+    
     int medio = (ini + fin) / 2;
-    if (v[medio] == x) return medio;
-    if (v[medio] > x) return BusquedaBinaria(v, x, ini, medio - 1);
-    return BusquedaBinaria(v, x, medio + 1, fin);
+    
+    if (v[medio] == x) {
+        return medio;
+    } else if (v[medio] > x) {
+        return BusquedaBinaria(x, v, ini, medio - 1);
+    } else {
+        return BusquedaBinaria(x, v, medio + 1, fin);
+    }
 }
 
-// Búsqueda binaria para vectores ordenados en orden descendente.
-template<typename T>
-int BusquedaBinaria_INV(const std::vector<T>& v, const T& x, int ini, int fin) {
-    if (ini > fin) return -1;
+// Búsqueda Binaria en vector ordenado descendentemente
+template <typename T>
+int BusquedaBinaria_INV(T x, std::vector<T>& v, int ini, int fin) {
+    if (ini > fin) {
+        return -1; // No se encuentra en el array
+    }
+    
     int medio = (ini + fin) / 2;
-    if (v[medio] == x) return medio;
-    if (v[medio] < x) return BusquedaBinaria_INV(v, x, ini, medio - 1); // invertido
-    return BusquedaBinaria_INV(v, x, medio + 1, fin);
+    
+    if (v[medio] == x) {
+        return medio;
+    } else if (v[medio] < x) {
+        return BusquedaBinaria_INV(x, v, ini, medio - 1);
+    } else {
+        return BusquedaBinaria_INV(x, v, medio + 1, fin);
+    }
 }
 
-// Partition: usa el último elemento como pivote, devuelve índice del pivote final.
-template<typename T>
-int Partition(std::vector<T>& V, int ini, int fin) {
-    T x = V[fin];
+// Función auxiliar para intercambiar dos elementos
+template <typename T>
+void swap(T& a, T& b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+// Partition: coloca el pivote en su posición correcta
+template <typename T>
+int Partition(std::vector<T>& v, int ini, int fin) {
+    T x = v[fin]; // Pivote: último elemento
     int i = ini;
-    for (int j = ini; j <= fin - 1; ++j) {
-        if (V[j] <= x) {
-            std::swap(V[i], V[j]);
-            ++i;
+    
+    for (int j = ini; j < fin; j++) {
+        if (v[j] <= x) {
+            swap(v[i], v[j]);
+            i++;
         }
     }
-    std::swap(V[i], V[fin]);
+    swap(v[i], v[fin]);
     return i;
 }
 
-// QuickSort recursivo.
-template<typename T>
-void QuickSort(std::vector<T>& V, int ini, int fin) {
+// QuickSort con pivote al final
+template <typename T>
+void QuickSort(std::vector<T>& v, int ini, int fin) {
     if (ini < fin) {
-        int pivot = Partition(V, ini, fin);
-        QuickSort(V, ini, pivot - 1);
-        QuickSort(V, pivot + 1, fin);
+        int pivot = Partition(v, ini, fin);
+        QuickSort(v, ini, pivot - 1);
+        QuickSort(v, pivot + 1, fin);
     }
 }
 
-#endif
+// Partition con pivote al inicio
+template <typename T>
+int PartitionFirst(std::vector<T>& v, int ini, int fin) {
+    swap(v[ini], v[fin]); // Mover primer elemento al final
+    return Partition(v, ini, fin);
+}
+
+// QuickSort con pivote al inicio
+template <typename T>
+void QuickSortFirst(std::vector<T>& v, int ini, int fin) {
+    if (ini < fin) {
+        int pivot = PartitionFirst(v, ini, fin);
+        QuickSortFirst(v, ini, pivot - 1);
+        QuickSortFirst(v, pivot + 1, fin);
+    }
+}
+
+// Partition con pivote central
+template <typename T>
+int PartitionMiddle(std::vector<T>& v, int ini, int fin) {
+    int medio = (ini + fin) / 2;
+    swap(v[medio], v[fin]); // Mover elemento central al final
+    return Partition(v, ini, fin);
+}
+
+// QuickSort con pivote central
+template <typename T>
+void QuickSortMiddle(std::vector<T>& v, int ini, int fin) {
+    if (ini < fin) {
+        int pivot = PartitionMiddle(v, ini, fin);
+        QuickSortMiddle(v, ini, pivot - 1);
+        QuickSortMiddle(v, pivot + 1, fin);
+    }
+}
+
+// Partition con pivote aleatorio
+template <typename T>
+int PartitionRandom(std::vector<T>& v, int ini, int fin) {
+    int random = ini + rand() % (fin - ini + 1);
+    swap(v[random], v[fin]); // Mover elemento aleatorio al final
+    return Partition(v, ini, fin);
+}
+
+// QuickSort con pivote aleatorio
+template <typename T>
+void QuickSortRandom(std::vector<T>& v, int ini, int fin) {
+    if (ini < fin) {
+        int pivot = PartitionRandom(v, ini, fin);
+        QuickSortRandom(v, ini, pivot - 1);
+        QuickSortRandom(v, pivot + 1, fin);
+    }
+}
+
+#endif // DYV_H
